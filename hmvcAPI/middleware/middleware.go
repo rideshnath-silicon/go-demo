@@ -47,7 +47,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
 		if tokenString == "" {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			helper.ApiFailure(w, 5002)
 			return
 		}
 		tokenString = tokenString[7:]
@@ -58,7 +58,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return jwtKey, nil
 		})
 		if err != nil || !token.Valid {
-			http.Error(w, "Unauthorized"+err.Error(), http.StatusUnauthorized)
+			helper.ApiFailure(w, 5001, err.Error())
 			return
 		}
 		next(w, r)

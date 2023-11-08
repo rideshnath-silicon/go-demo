@@ -46,14 +46,15 @@ func ApiSuccess(w http.ResponseWriter, data interface{}, MessageCode int) {
 	}
 }
 
-func ApiFailure(w http.ResponseWriter, MessageCode int) {
+func ApiFailure(w http.ResponseWriter, MessageCode int, errs ...string) {
 	type Responses struct {
 		Message string
 		Success int
+		Error   interface{}
 	}
 	w.Header().Set("Content-Type", "Application/json")
 	messages := messages(MessageCode)
-	Response := Responses{Message: messages, Success: 0}
+	Response := Responses{Message: messages, Success: 0, Error: errs}
 	err := json.NewEncoder(w).Encode(Response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

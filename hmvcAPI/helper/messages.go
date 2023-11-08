@@ -21,6 +21,8 @@ func messages(MessageCode int) string {
 		messages = "Error in create"
 	case 5001 :
 		messages = "Unauthorized User"
+	case 5002 :
+		messages = "Tokan Not Found"
 	default:
 		messages = "okk"
 	}
