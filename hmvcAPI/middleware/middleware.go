@@ -21,8 +21,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		var user models.User
 		bodyData := helper.RequestBody(w, r, user)
+		err := loginValidate(bodyData)
+		if err != nil {
+			helper.ApiFailure(w, 101, err.Error())
+			return
+		}
 		userData := models.LoginUser(bodyData.Email, bodyData.Password)
-		fmt.Println(userData)
+		// fmt.Println(userData)
 		if userData.Password == "" && userData.Email == "" {
 			helper.ApiFailure(w, 5001)
 			return
@@ -63,4 +68,14 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 		next(w, r)
 	}
+}
+
+func loginValidate(data models.User) error {
+	if data.Email == "" {
+		return fmt.Errorf("email is required")
+	}
+	if data.Password == "" {
+		return fmt.Errorf("password is required")
+	}
+	return nil
 }

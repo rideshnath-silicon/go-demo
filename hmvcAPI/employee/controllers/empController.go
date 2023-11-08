@@ -83,10 +83,6 @@ func DeleteEmp(w http.ResponseWriter, r *http.Request) {
 
 func validateEmployee(data models.Employee) error {
 	if data.FirstName == "" {
-		return fmt.Errorf("plaese Enter name")
-
-	}
-	if data.FirstName == "" {
 		return fmt.Errorf("plaese Enter Firstname")
 
 	}
@@ -102,7 +98,7 @@ func validateEmployee(data models.Employee) error {
 		return fmt.Errorf("plaese Enter Role")
 
 	}
-	if data.Age < 0 && data.Age > 999 {
+	if data.Age < 0 {
 		return fmt.Errorf("age must be non-negative")
 	}
 	return nil
