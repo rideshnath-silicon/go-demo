@@ -2,15 +2,17 @@ package middleware
 
 import (
 	"fmt"
-	"gin/models"
+	"gin/User/models"
+	"gin/helpers"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
-var jwtKey = []byte("HMVCC")
+var jwtKey = []byte(os.Getenv("JWT_SEC_KEY"))
 
 type JwtClaim struct {
 	Email string
@@ -18,17 +20,17 @@ type JwtClaim struct {
 }
 
 func Login(r *gin.Context) {
-	var user models.User
+	var user models.LoginUserRequest
 	r.ShouldBindJSON(&user)
-	err := loginValidate(user)
-	if err != nil {
-		r.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	varErr := user.LoginValidate()
+	if varErr != nil {
+		r.JSON(http.StatusBadRequest, gin.H{"error": varErr.Error()})
 		r.Abort()
 		return
 	}
-	userData := models.LoginUser(user.Email, user.Password)
+	userData, _ := models.LoginUser(user.Email, user.Password)
 	if userData.Password == "" && userData.Email == "" {
-		r.JSON(http.StatusBadRequest, gin.H{"error": "Unauthorized User"})
+		helpers.ApiFailure(r, http.StatusBadRequest, 1001, "Unauthorized User")
 		r.Abort()
 		return
 	}
@@ -39,9 +41,11 @@ func Login(r *gin.Context) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		r.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		helpers.ApiFailure(r, http.StatusBadRequest, 1001, err.Error())
+		return
 	}
-	r.JSON(http.StatusBadRequest, gin.H{"Tokan": tokenString})
+	data := map[string]interface{}{"User_Data": token.Claims, "Tokan": tokenString}
+	helpers.ApiSuccess(r, http.StatusOK, 1000, data)
 
 }
 
@@ -49,7 +53,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(r *gin.Context) {
 		tokenString := r.GetHeader("Authorization")
 		if tokenString == "" {
-			r.JSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
+			helpers.ApiFailure(r, http.StatusBadRequest, 1001, "Missing token")
 			r.Abort()
 			return
 		}
@@ -61,19 +65,17 @@ func AuthMiddleware() gin.HandlerFunc {
 			return jwtKey, nil
 		})
 		if err != nil || !token.Valid {
-			r.JSON(http.StatusBadRequest, gin.H{"error": "Unauthorized User"})
+			helpers.ApiFailure(r, http.StatusBadRequest, 1001, err.Error())
 			r.Abort()
+			return
 		}
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			helpers.ApiFailure(r, http.StatusBadRequest, 1001, "Invalid token claims")
+			r.Abort()
+			return
+		}
+		r.Set("user", claims)
 		r.Next()
 	}
-}
-
-func loginValidate(data models.User) error {
-	if data.Email == "" {
-		return fmt.Errorf("email is required")
-	}
-	if data.Password == "" {
-		return fmt.Errorf("password is required")
-	}
-	return nil
 }

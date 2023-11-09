@@ -3,10 +3,8 @@ package main
 import (
 	"hmvcstructure/config"
 	emp "hmvcstructure/employee/models"
-	empRoute "hmvcstructure/employee/routes"
-	"hmvcstructure/middleware"
+	"hmvcstructure/routes"
 	user "hmvcstructure/user/models"
-	userRoute "hmvcstructure/user/routes"
 	"log"
 	"net/http"
 
@@ -24,9 +22,7 @@ func main() {
 		panic("failed to perform migrations: " + err.Error())
 	}
 	r := mux.NewRouter()
-	empRoute.EmpRoutes(r)
-	userRoute.UserRoutes(r)
+	routes.IndexRoutes(r)
 	http.Handle("/", r)
-	r.HandleFunc("/", middleware.Login)
 	log.Fatal(http.ListenAndServe(":5555", nil))
 }

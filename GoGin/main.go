@@ -1,13 +1,13 @@
 package main
 
 import (
+	studentmodel "gin/Student/StudentModel"
 	"gin/config"
 	"gin/routes"
+	user "os/user"
 
 	"github.com/gin-gonic/gin"
 )
-
-
 
 func init() {
 	config.LoadEnvVariable()
@@ -16,7 +16,11 @@ func init() {
 }
 
 func main() {
+	err := config.DB.AutoMigrate(&user.User{}, &studentmodel.Student{})
+	if err != nil {
+		panic("failed to perform migrations: " + err.Error())
+	}
 	r := gin.Default()
-	routes.UserRoutes(r)
-	r.Run() // listen and serve on 0.0.0.0:8080
+	routes.IndexRouter(r)
+	r.Run()
 }
