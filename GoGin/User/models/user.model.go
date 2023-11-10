@@ -2,16 +2,17 @@ package models
 
 import (
 	"gin/config"
+	"gin/helpers"
 	"time"
 )
 
-func LoginUser(email string, pass string) (User,error) {
+func LoginUser(email string, pass string) (User, error) {
 	var user User
-	result := config.DB.Select("email").Where("email = ? ", email).Where("password = ?", pass).Find(&user)
+	result := config.DB.Select("email", "id").Where("email = ? ", email).Where("password = ?", pass).Find(&user)
 	if result.Error != nil {
-		return user ,result.Error
+		return user, result.Error
 	}
-	return user,nil
+	return user, nil
 }
 
 func GetAllUser() []User {
@@ -23,7 +24,19 @@ func GetAllUser() []User {
 	return user
 }
 
-func GetUser(id uint) interface{} {
+func GetUserByEmail(Email string) (string, error) {
+	var user User
+	result := config.DB.Select("password").Where("email = ?", Email).Find(&user)
+	if result.Error != nil {
+		return "", result.Error
+	}
+	if result.RowsAffected == 0 {
+		return "", nil
+	}
+	return user.Password, nil
+}
+
+func GetUser(id interface{}) interface{} {
 	var user User
 	result := config.DB.Where("id = ?", id).Find(&user)
 	if result.Error != nil {
@@ -35,13 +48,17 @@ func GetUser(id uint) interface{} {
 	return user
 }
 func NewUser(data NewUserRequest) interface{} {
+	pass, err := helpers.HashData(data.Password)
+	if err != nil {
+		return err.Error()
+	}
 	user := User{
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
 		Age:       data.Age,
 		Email:     data.Email,
 		Country:   data.Country,
-		Password:  data.Password,
+		Password:  pass,
 		Role:      data.Role,
 		CreatedAt: time.Now(),
 	}
@@ -56,11 +73,15 @@ func NewUser(data NewUserRequest) interface{} {
 }
 
 func UpdateUser(id uint, data UpdateUserRequest) interface{} {
+	pass, err := helpers.HashData(data.Password)
+	if err != nil {
+		return err.Error()
+	}
 	var user = User{
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
 		Email:     data.Email,
-		Password:  data.Password,
+		Password:  pass,
 		Role:      data.Role,
 		Country:   data.Country,
 		Age:       data.Age,
@@ -74,4 +95,16 @@ func UpdateUser(id uint, data UpdateUserRequest) interface{} {
 		return 0
 	}
 	return data
+}
+
+func DeleteUser(id uint) (interface{}, error) {
+	var user User
+	err := config.DB.Delete(&user).Where("id = ?", id)
+	if err.Error != nil {
+		return nil, err.Error
+	}
+	if err.RowsAffected == 0 {
+		return 0, nil
+	}
+	return user, nil
 }

@@ -1,7 +1,9 @@
 package main
 
 import (
+	classmodel "gin/Class/ClassModel"
 	studentmodel "gin/Student/StudentModel"
+	submodel "gin/Subject/subModel"
 	"gin/config"
 	"gin/routes"
 	user "os/user"
@@ -16,7 +18,7 @@ func init() {
 }
 
 func main() {
-	err := config.DB.AutoMigrate(&user.User{}, &studentmodel.Student{})
+	err := config.DB.AutoMigrate(&user.User{}, &studentmodel.Student{}, &submodel.Subject{}, &classmodel.Class{})
 	if err != nil {
 		panic("failed to perform migrations: " + err.Error())
 	}

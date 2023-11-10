@@ -5,6 +5,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func Now() string {
@@ -41,12 +42,32 @@ func ApiFailure(c *gin.Context, status int, messageCode int, err string) {
 	c.JSON(status, Response)
 }
 
-func GetUserDataFromTokan(c *gin.Context) interface{} {
+func GetUserDataFromTokan(c *gin.Context) (map[string]interface{}, bool) {
 	userClaims, exists := c.Get("user")
 	if !exists {
-		return 0
+		return nil, false
 	}
 	// Access user data from claims
-	userID := userClaims.(jwt.MapClaims)["Email"].(string)
-	return userID
+	userID := userClaims.(jwt.MapClaims)["ID"]
+	userEmail := userClaims.(jwt.MapClaims)["Email"]
+	response := map[string]interface{}{"Email": userEmail, "User_id": userID}
+
+	return response, true
+}
+
+func HashData(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), err
+}
+
+func VerifyHashedData(hashedString string, dataString string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedString), []byte(dataString))
+
+	if err != nil {
+		return err
+	}
+	return nil
 }

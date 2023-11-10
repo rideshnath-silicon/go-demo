@@ -8,6 +8,7 @@ import (
 
 func StudentRoutes(r *gin.Engine) {
 	r.GET("/student", studentcontroller.GetStudent)
+	r.GET("/student/class", studentcontroller.GetClassWiseStudent)
 	r.POST("/New-student", studentcontroller.RegisterStudent)
 	r.PUT("/UP-student", studentcontroller.UpdateStudent)
 }

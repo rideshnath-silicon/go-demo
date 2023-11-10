@@ -1,7 +1,9 @@
 package routes
 
 import (
+	classroute "gin/Class/ClassRoute"
 	studentroute "gin/Student/StudentRoute"
+	subroute "gin/Subject/subRoute"
 	"gin/User/routes"
 	"gin/middleware"
 
@@ -21,4 +23,6 @@ func IndexRouter(r *gin.Engine) {
 	r.Use(middleware.AuthMiddleware())
 	routes.UserRoutes(r)
 	studentroute.StudentRoutes(r)
+	subroute.SubRoute(r)
+	classroute.Classroute(r)
 }

@@ -16,6 +16,7 @@ var jwtKey = []byte(os.Getenv("JWT_SEC_KEY"))
 
 type JwtClaim struct {
 	Email string
+	ID    int
 	jwt.StandardClaims
 }
 
@@ -28,14 +29,28 @@ func Login(r *gin.Context) {
 		r.Abort()
 		return
 	}
-	userData, _ := models.LoginUser(user.Email, user.Password)
+	userPassHashString, err := models.GetUserByEmail(user.Email)
+	if err != nil {
+		helpers.ApiFailure(r, http.StatusBadRequest, 1001, err.Error())
+		return
+	}
+	if userPassHashString == "" {
+		helpers.ApiFailure(r, http.StatusBadRequest, 1001, "Please Use valid Email")
+		return
+	}
+	passErr := helpers.VerifyHashedData(userPassHashString, user.Password)
+	if passErr != nil {
+		helpers.ApiFailure(r, http.StatusBadRequest, 1001, passErr.Error())
+		return
+	}
+	userData, _ := models.LoginUser(user.Email, userPassHashString)
 	if userData.Password == "" && userData.Email == "" {
 		helpers.ApiFailure(r, http.StatusBadRequest, 1001, "Unauthorized User")
 		r.Abort()
 		return
 	}
 	expirationTime := time.Now().Add(1 * time.Hour)
-	claims := &JwtClaim{Email: user.Email, StandardClaims: jwt.StandardClaims{
+	claims := &JwtClaim{Email: userData.Email, ID: int(userData.ID), StandardClaims: jwt.StandardClaims{
 		ExpiresAt: expirationTime.Unix(),
 	}}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
