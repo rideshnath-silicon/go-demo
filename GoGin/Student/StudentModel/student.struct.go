@@ -18,5 +18,5 @@ type Student struct {
 	Password   string `json:"password" gorm:"not null"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
-	DeletedAt  gorm.DeletedAt
+	DeletedAt  gorm.DeletedAt 
 }

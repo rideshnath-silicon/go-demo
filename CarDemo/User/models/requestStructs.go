@@ -7,14 +7,11 @@ import (
 )
 
 type NewUserRequest struct {
-	FirstName   string `json:"first_name" `
-	LastName    string `json:"last_name"`
-	Email       string `json:"email" `
-	Country     string `json:"country" `
-	Role        string `json:"role" `
-	Age         int    `json:"age"`
-	PhoneNumber string `json:"phone_number"`
-	Password    string `json:"password" `
+	FirstName    string `json:"first_name" `
+	LastName     string `json:"last_name"`
+	Email        string `json:"email" `
+	MobileNumber string `json:"mobile_number"`
+	Password     string `json:"password" `
 }
 type LoginUserRequest struct {
 	ID       int    `json:"user_id"`
@@ -27,15 +24,12 @@ type GetUserRequest struct {
 }
 
 type UpdateUserRequest struct {
-	ID          uint   `json:"user_id"`
-	FirstName   string `json:"first_name" `
-	LastName    string `json:"last_name"`
-	Email       string `json:"email" `
-	PhoneNumber string `json:"phone_number"`
-	Country     string `json:"country"`
-	Role        string `json:"role" `
-	Age         int    `json:"age"`
-	Password    string `json:"password"`
+	ID           uint   `json:"user_id"`
+	FirstName    string `json:"first_name" `
+	LastName     string `json:"last_name"`
+	Email        string `json:"email" `
+	MobileNumber string `json:"mobile_number"`
+	Password     string `json:"password"`
 }
 
 /*
@@ -51,9 +45,7 @@ func (a NewUserRequest) NewUserValidate() error {
 		validation.Field(&a.FirstName, validation.Required, validation.Length(3, 50)),
 		validation.Field(&a.LastName, validation.Required, validation.Length(5, 50)),
 		validation.Field(&a.Email, validation.Required, validation.Match(regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`))),
-		validation.Field(&a.Role, validation.Required),
-		validation.Field(&a.Age, validation.Required),
-		validation.Field(&a.Country, validation.Required),
+		validation.Field(&a.MobileNumber, validation.Required),
 		validation.Field(&a.Password, validation.Required, validation.Match(regexp.MustCompile(`^[0-9]{6}$`))),
 	)
 }

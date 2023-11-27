@@ -6,7 +6,7 @@ import (
 )
 
 func GetStudent(roll_number string) (interface{}, error) {
-	var student Student
+	var student Student	
 	result := config.DB.Where("roll_number = ?", roll_number).Find(&student)
 	if result.Error != nil {
 		return nil, result.Error

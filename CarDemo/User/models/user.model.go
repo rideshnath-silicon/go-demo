@@ -1,13 +1,13 @@
 package models
 
 import (
-	"gin/config"
-	"gin/helpers"
+	"cardemo-crud/config"
+	"cardemo-crud/helpers"
 	"time"
 )
 
-func LoginUser(email string, pass string) (User, error) {
-	var user User
+func LoginUser(email string, pass string) (CarUser, error) {
+	var user CarUser
 	result := config.DB.Select("email", "id").Where("email = ? ", email).Where("password = ?", pass).Find(&user)
 	if result.Error != nil {
 		return user, result.Error
@@ -15,8 +15,8 @@ func LoginUser(email string, pass string) (User, error) {
 	return user, nil
 }
 
-func GetAllUser() []User {
-	var user []User
+func GetAllUser() []CarUser {
+	var user []CarUser
 	result := config.DB.Find(&user)
 	if result.Error != nil {
 		panic("Error:-" + result.Error.Error())
@@ -25,7 +25,7 @@ func GetAllUser() []User {
 }
 
 func GetUserByEmail(Email string) (string, error) {
-	var user User
+	var user CarUser
 	result := config.DB.Select("password").Where("email = ?", Email).Find(&user)
 	if result.Error != nil {
 		return "", result.Error
@@ -37,7 +37,7 @@ func GetUserByEmail(Email string) (string, error) {
 }
 
 func GetUser(id interface{}) interface{} {
-	var user User
+	var user CarUser
 	result := config.DB.Where("id = ?", id).Find(&user)
 	if result.Error != nil {
 		return 0
@@ -52,16 +52,13 @@ func NewUser(data NewUserRequest) interface{} {
 	if err != nil {
 		return err.Error()
 	}
-	user := User{
-		FirstName: data.FirstName,
-		LastName:  data.LastName,
-		Age:       data.Age,
-		Email:     data.Email,
-		Country:   data.Country,
-		Password:  pass,
-		Role:      data.Role,
-		PhoneNumber: data.PhoneNumber,
-		CreatedAt: time.Now(),
+	user := CarUser{
+		FirstName:    data.FirstName,
+		LastName:     data.LastName,
+		Email:        data.Email,
+		MobileNumber: "fss",
+		Password:     pass,
+		CreatedAt:    time.Now(),
 	}
 	result := config.DB.Create(&user)
 	if result.Error != nil {
@@ -78,16 +75,12 @@ func UpdateUser(id uint, data UpdateUserRequest) interface{} {
 	if err != nil {
 		return err.Error()
 	}
-	var user = User{
-		FirstName:   data.FirstName,
-		LastName:    data.LastName,
-		Email:       data.Email,
-		Password:    pass,
-		Role:        data.Role,
-		Country:     data.Country,
-		Age:         data.Age,
-		UpdatedAt:   time.Now(),
-		PhoneNumber: data.PhoneNumber,
+	var user = CarUser{
+		FirstName: data.FirstName,
+		LastName:  data.LastName,
+		Email:     data.Email,
+		Password:  pass,
+		UpdatedAt: time.Now(),
 	}
 	result := config.DB.Where("id = ?", id).Updates(user).Model(&user)
 	if result.Error != nil {
@@ -100,7 +93,7 @@ func UpdateUser(id uint, data UpdateUserRequest) interface{} {
 }
 
 func DeleteUser(id uint) (interface{}, error) {
-	var user User
+	var user CarUser
 	err := config.DB.Delete(&user).Where("id = ?", id)
 	if err.Error != nil {
 		return nil, err.Error
